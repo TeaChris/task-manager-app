@@ -7,6 +7,7 @@ import { FieldValues, useForm, SubmitHandler } from 'react-hook-form'
 import AuthSocialButton from './AuthSocialButton'
 
 import { BsGoogle, BsGithub } from 'react-icons/bs'
+import axios from 'axios'
 
 type variant = 'LOGIN' | 'REGISTER'
 
@@ -35,12 +36,11 @@ export default function AuthForm() {
   })
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log('form submitted')
     setIsLoading(true)
 
     // registering user
     if (variant === 'REGISTER') {
-      // axios register
+      axios.post('/api/register', data)
     }
 
     if (variant === 'LOGIN') {
