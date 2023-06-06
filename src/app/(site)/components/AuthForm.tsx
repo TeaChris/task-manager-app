@@ -2,20 +2,29 @@
 
 import Button from '@/app/components/Button'
 import Input from '@/app/components/inputs/Input'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { FieldValues, useForm, SubmitHandler } from 'react-hook-form'
 import AuthSocialButton from './AuthSocialButton'
 
 import { BsGoogle, BsGithub } from 'react-icons/bs'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 type variant = 'LOGIN' | 'REGISTER'
 
 export default function AuthForm() {
+  const session = useSession()
+  const router = useRouter()
   const [variant, setVariant] = useState<variant>('LOGIN')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      router.push('/home')
+    }
+  }, [session?.status, router])
 
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') {
@@ -70,15 +79,17 @@ export default function AuthForm() {
   const socialAction = (action: string) => {
     setIsLoading(true)
 
-    signIn(action, { redirect: false }).then((callback) => {
-      if (callback?.error) {
-        toast.error('Invalid credentials!')
-      }
+    signIn(action, { redirect: false })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid credentials!')
+        }
 
-      if (callback?.ok && !callback.error) {
-        toast.success('Logged in!')
-      }
-    }).finally(()=>setIsLoading(false))
+        if (callback?.ok && !callback.error) {
+          toast.success('Logged in!')
+        }
+      })
+      .finally(() => setIsLoading(false))
   }
 
   return (
